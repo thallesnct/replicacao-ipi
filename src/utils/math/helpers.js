@@ -1,17 +1,17 @@
-export const resetInitialConditionsTo = (parser, config) => {
-  const configKeys = Object.keys(config)
+export const setInitialConditionsTo = (parser, config) => {
+  const configKeys = Object.keys(config);
 
   configKeys.forEach(key => parser.evaluate(`${key} = ${config[key]}`));
 }
 
 export const ndsolve = (math) => (f, x0, dt, tmax) => {
-  let x = x0.clone()  // Current values of variables
-  const result = [x]  // Contains entire solution
-  const nsteps = math.divide(tmax, dt)   // Number of time steps
+  let x = x0.clone()  // Valor atual das variáveis
+  const result = [x]  // Contem a resolução
+  const nsteps = math.divide(tmax, dt)   // Numero de passos
   for (let i = 0; i < nsteps; i++) {
-    // Compute derivatives
-    const dxdt = f.map(func => func(...x.toArray()))
-    // Euler method to compute next time step
+    // Computar derivadas
+    const dxdt = f.map(func => func(...x.toArray()));
+    // Calcular próximo passo utilizando método de Euler
     const dx = math.multiply(dxdt, dt)
     x = math.add(x, dx)
     result.push(x)

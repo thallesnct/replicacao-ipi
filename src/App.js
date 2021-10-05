@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { create, all } from 'mathjs';
 import { Scatter } from 'react-chartjs-2';
 
-import { ndsolve, resetInitialConditionsTo } from './utils/math/helpers'
+import { ndsolve, setInitialConditionsTo } from './utils/math/helpers'
 import { getMainChartOptions, getChartOptions, getEarthChartOptions } from './utils/math/options'
 import { importCommonFunctions, importGlobals, importMotionEquations } from './utils/math/globalVariables'
 
@@ -25,7 +25,7 @@ function App() {
     parser.evaluate("result_stage1 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], [r0, v0, m0, phi0, gamma0, t0], dt, tfinal)")
 
     // Reset initial conditions for interstage flight
-    resetInitialConditionsTo(parser, {
+    setInitialConditionsTo(parser, {
       dm: '0 kg/s',
       tfinal: '10 s',
       x: 'flatten(result_stage1[end,:])',
@@ -35,7 +35,7 @@ function App() {
     parser.evaluate("result_interstage = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
     // Reset initial conditions for stage 2 flight
-    resetInitialConditionsTo(parser, {
+    setInitialConditionsTo(parser, {
       dm: '270.8 kg/s',
       isp_vac: '348 s',
       tfinal: '350 s',
@@ -45,7 +45,7 @@ function App() {
     parser.evaluate("result_stage2 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
     // Reset initial conditions for unpowered flight
-    resetInitialConditionsTo(parser, {
+    setInitialConditionsTo(parser, {
       dm: '0 kg/s',
       tfinal: '900 s',
       dt: '10 s',
@@ -55,7 +55,7 @@ function App() {
     parser.evaluate("result_unpowered1 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
     // Reset initial conditions for final orbit insertion
-    resetInitialConditionsTo(parser, {
+    setInitialConditionsTo(parser, {
       dm: '270.8 kg/s',
       tfinal: '39 s',
       dt: '0.5 s',
@@ -65,7 +65,7 @@ function App() {
     parser.evaluate("result_insertion = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
     // Reset initial conditions for unpowered flight
-    resetInitialConditionsTo(parser, {
+    setInitialConditionsTo(parser, {
       dm: '0 kg/s',
       tfinal: '250 s',
       dt: '10 s',
