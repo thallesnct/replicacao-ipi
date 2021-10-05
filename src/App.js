@@ -93,9 +93,8 @@ function App() {
             + `(${resultName}[:,1] - r0) / km`                // Height above surface (in km)
             + ')'
           ).toArray().map(([x, y]) => ({ x, y })),
-          borderColor: i % 2 ? '#00f' : '#dc3912',
-          fill: true,
-          pointRadius: 1,
+          borderColor: i % 2 ? '#f2f4f6' : '#dc3912',
+          fill: false,
         })),
         options: getMainChartOptions()
       },
@@ -176,7 +175,7 @@ function App() {
     ]))
   }, [])
 
-  console.log('First dataSet', dataSets[1])
+  console.log('First dataSet', dataSets[0])
 
   const appendDefaultConfig = (dataSetsArr) => (
     dataSetsArr?.map(dataSet => ({ 
@@ -186,19 +185,25 @@ function App() {
     }))
   );
 
+  const renderGraphs = () => {
+    console.log('RENDERING!!!!')
+
+    return dataSets?.map((dataSetConfig) => (
+      <div style={{
+        // maxWidth: '100vw',
+        // maxHeight: '100vh',
+      }}>
+        <Scatter data={{ datasets: !dataSetConfig?.useDefaultConfig ? dataSetConfig?.datasets : appendDefaultConfig(dataSetConfig?.datasets) }} options={getChartOptions(dataSetConfig?.options)} />
+      </div>
+    ))
+  }
+
   return (
     <div className="App" style={{
       display: 'grid',
       gridTemplateColumns: 'repeat(1, 1fr)'
     }}>
-      {dataSets.slice(0,1).map((dataSetConfig) => (
-        <div style={{
-          maxWidth: '100vw',
-          maxHeight: '100vh',
-        }}>
-          <Scatter data={{ datasets: !dataSetConfig?.useDefaultConfig ? dataSetConfig?.datasets : appendDefaultConfig(dataSetConfig?.datasets) }} options={getChartOptions(dataSetConfig?.options)} />
-        </div>
-      ))}
+      {renderGraphs()}
     </div>
   );
 }
