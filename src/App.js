@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
 import { create, all } from 'mathjs';
-import { Scatter } from 'react-chartjs-2';
+import Graph from './components/Graph/Graph';
 
 import { ndsolve, setInitialConditionsTo } from './utils/math/helpers'
-import { getMainChartOptions, getChartOptions, getEarthChartOptions } from './utils/math/options'
+import { getMainChartOptions, getEarthChartOptions } from './utils/math/options'
 import { importCommonFunctions, importGlobals, importMotionEquations } from './utils/math/globalVariables'
 
 function App() {
@@ -181,21 +181,17 @@ function App() {
     ]))
   }, [])
 
-  const appendDefaultConfig = (dataSetsArr) => (
-    dataSetsArr?.map(dataSet => ({ 
-      borderColor: "#dc3912",
-      fill: true,
-      ...dataSet
-    }))
-  );
-
   const renderGraphs = () => {
     return dataSets?.map((dataSetConfig) => (
       <div style={{
         // maxWidth: '100vw',
         // maxHeight: '100vh',
       }}>
-        <Scatter data={{ datasets: !dataSetConfig?.useDefaultConfig ? dataSetConfig?.datasets : appendDefaultConfig(dataSetConfig?.datasets) }} options={getChartOptions(dataSetConfig?.options)} />
+        <Graph 
+          datasets={dataSetConfig?.datasets}
+          options={dataSetConfig?.options}
+          useDefaultConfig={dataSetConfig?.useDefaultConfig}
+        />
       </div>
     ))
   }
