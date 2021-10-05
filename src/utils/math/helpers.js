@@ -1,8 +1,10 @@
-import { create, all } from 'mathjs';
+export const resetInitialConditionsTo = (parser, config) => {
+  const configKeys = Object.keys(config)
 
-const math = create(all)
+  configKeys.forEach(key => parser.evaluate(`${key} = ${config[key]}`));
+}
 
-function ndsolve(f, x0, dt, tmax) {
+export const ndsolve = (math) => (f, x0, dt, tmax) => {
   let x = x0.clone()  // Current values of variables
   const result = [x]  // Contains entire solution
   const nsteps = math.divide(tmax, dt)   // Number of time steps
@@ -16,5 +18,3 @@ function ndsolve(f, x0, dt, tmax) {
   }
   return math.matrix(result)
 }
-
-export default ndsolve;

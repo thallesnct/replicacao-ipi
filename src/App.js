@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
 import { create, all } from 'mathjs';
-import { Line, Scatter } from 'react-chartjs-2';
+import { Scatter } from 'react-chartjs-2';
 
-
-import ndsolve from './utils/math/ndsolve'
+import { ndsolve, resetInitialConditionsTo } from './utils/math/helpers'
 import { getMainChartOptions, getChartOptions, getEarthChartOptions } from './utils/math/options'
-import { importGlobals, importMotionEquations } from './utils/math/globalVariables'
+import { importCommonFunctions, importGlobals, importMotionEquations } from './utils/math/globalVariables'
 
 function App() {
   const [dataSets, setDataSets] = useState([])
@@ -14,70 +13,77 @@ function App() {
   useEffect(() => {
     const math = create(all);
 
-    math.import({ ndsolve });
+    math.import({ ndsolve: ndsolve(math) });
   
     const parser = math.parser();
   
     importGlobals(parser);
-  
     importMotionEquations(parser);
-
-    // It is important to maintain the same argument order for each of these functions.
-    parser.evaluate("drdt(r, v, m, phi, gamma, t) = v sin(gamma)")
-    parser.evaluate("dvdt(r, v, m, phi, gamma, t) = - gravity(r) * sin(gamma) + (thrust(isp(r)) - drag(r, v)) / m")
-    parser.evaluate("dmdt(r, v, m, phi, gamma, t) = - dm")
-    parser.evaluate("dphidt(r, v, m, phi, gamma, t) = angVel(r, v, gamma)")
-    parser.evaluate("dgammadt(r, v, m, phi, gamma, t) = angVel(r, v, gamma) - gravity(r) * cos(gamma) / v * rad")
-    parser.evaluate("dtdt(r, v, m, phi, gamma, t) = 1")
+    importCommonFunctions(parser)
 
     // Remember to maintain the same variable order in the call to ndsolve.
     parser.evaluate("result_stage1 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], [r0, v0, m0, phi0, gamma0, t0], dt, tfinal)")
 
     // Reset initial conditions for interstage flight
-    parser.evaluate("dm = 0 kg/s")
-    parser.evaluate("tfinal = 10 s")
-    parser.evaluate("x = flatten(result_stage1[end,:])")
-    parser.evaluate("x[3] = m2+m3+mp") // New mass after stage seperation
+    resetInitialConditionsTo(parser, {
+      dm: '0 kg/s',
+      tfinal: '10 s',
+      x: 'flatten(result_stage1[end,:])',
+      'x[3]': 'm2+m3+mp' // New mass after stage seperation
+    })
+
     parser.evaluate("result_interstage = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
     // Reset initial conditions for stage 2 flight
-    parser.evaluate("dm = 270.8 kg/s")
-    parser.evaluate("isp_vac = 348 s")
-    parser.evaluate("tfinal = 350 s")
-    parser.evaluate("x = flatten(result_interstage[end,:])")
+    resetInitialConditionsTo(parser, {
+      dm: '270.8 kg/s',
+      isp_vac: '348 s',
+      tfinal: '350 s',
+      x: 'flatten(result_interstage[end,:])',
+    })
+
     parser.evaluate("result_stage2 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
     // Reset initial conditions for unpowered flight
-    parser.evaluate("dm = 0 kg/s")
-    parser.evaluate("tfinal = 900 s")
-    parser.evaluate("dt = 10 s")
-    parser.evaluate("x = flatten(result_stage2[end,:])")
+    resetInitialConditionsTo(parser, {
+      dm: '0 kg/s',
+      tfinal: '900 s',
+      dt: '10 s',
+      x: 'flatten(result_stage2[end,:])',
+    })
+
     parser.evaluate("result_unpowered1 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
     // Reset initial conditions for final orbit insertion
-    parser.evaluate("dm = 270.8 kg/s")
-    parser.evaluate("tfinal = 39 s")
-    parser.evaluate("dt = 0.5 s")
-    parser.evaluate("x = flatten(result_unpowered1[end,:])")
+    resetInitialConditionsTo(parser, {
+      dm: '270.8 kg/s',
+      tfinal: '39 s',
+      dt: '0.5 s',
+      x: 'flatten(result_unpowered1[end,:])',
+    })
+
     parser.evaluate("result_insertion = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
     // Reset initial conditions for unpowered flight
-    parser.evaluate("dm = 0 kg/s")
-    parser.evaluate("tfinal = 250 s")
-    parser.evaluate("dt = 10 s")
-    parser.evaluate("x = flatten(result_insertion[end,:])")
+    resetInitialConditionsTo(parser, {
+      dm: '0 kg/s',
+      tfinal: '250 s',
+      dt: '10 s',
+      x: 'flatten(result_insertion[end,:])',
+    })
+
     parser.evaluate("result_unpowered2 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
-    // Now it's time to prepare results for plotting
+    // Preparar resultados para criação dos graficos
     const resultNames = ['stage1', 'interstage', 'stage2', 'unpowered1', 'insertion', 'unpowered2']
       .map(stageName => `result_${stageName}`)
 
     parser.set('result',
       math.concat(
         ...resultNames.map(resultName =>
-          parser.evaluate(`${resultName}[:end-1, :]`)  // Avoid overlap
+          parser.evaluate(`${resultName}[:end-1, :]`)  // Evitar sobreposição
         ),
-        0 // Concat in row-dimension
+        0 // Concatenar na linha
       )
     )
 
@@ -175,8 +181,6 @@ function App() {
     ]))
   }, [])
 
-  console.log('First dataSet', dataSets[0])
-
   const appendDefaultConfig = (dataSetsArr) => (
     dataSetsArr?.map(dataSet => ({ 
       borderColor: "#dc3912",
@@ -186,8 +190,6 @@ function App() {
   );
 
   const renderGraphs = () => {
-    console.log('RENDERING!!!!')
-
     return dataSets?.map((dataSetConfig) => (
       <div style={{
         // maxWidth: '100vw',

@@ -6,14 +6,14 @@ export const getMainChartOptions = () => {
         position: 'bottom',
         scaleLabel: {
           display: true,
-          labelString: 'surface distance travelled (in km)'
+          labelString: 'distancia viajada na superficie (em km)'
         }
       }],
       yAxes: [{
         type: 'linear',
         scaleLabel: {
           display: true,
-          labelString: 'height above surface (in km)'
+          labelString: 'altura acima da superficie (em km)'
         }
       }]
     },
@@ -29,7 +29,7 @@ export const getChartOptions = (options) => {
         position: 'bottom',
         scaleLabel: {
           display: true,
-          labelString: 'time (in s)'
+          labelString: 'tempo (em s)'
         }
       }]
     },

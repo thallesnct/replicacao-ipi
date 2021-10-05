@@ -30,3 +30,13 @@ export const importMotionEquations = (parser) => {
   parser.evaluate("isp(r) = isp_vac + (isp_sea - isp_vac) * density(r)/density(r0)") // pressão ~ densidade para constante de temperatura
   parser.evaluate("thrust(isp) = g0 * isp * dm")
 }
+
+export const importCommonFunctions = (parser) => {
+  // É importante que a ordem de cada argumento das funções abaixo seja mantida
+  parser.evaluate("drdt(r, v, m, phi, gamma, t) = v sin(gamma)")
+  parser.evaluate("dvdt(r, v, m, phi, gamma, t) = - gravity(r) * sin(gamma) + (thrust(isp(r)) - drag(r, v)) / m")
+  parser.evaluate("dmdt(r, v, m, phi, gamma, t) = - dm")
+  parser.evaluate("dphidt(r, v, m, phi, gamma, t) = angVel(r, v, gamma)")
+  parser.evaluate("dgammadt(r, v, m, phi, gamma, t) = angVel(r, v, gamma) - gravity(r) * cos(gamma) / v * rad")
+  parser.evaluate("dtdt(r, v, m, phi, gamma, t) = 1")
+}
