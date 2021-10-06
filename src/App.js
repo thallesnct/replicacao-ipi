@@ -22,61 +22,61 @@ function App() {
     importCommonFunctions(parser)
 
     // Remember to maintain the same variable order in the call to ndsolve.
-    parser.evaluate("result_stage1 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], [r0, v0, m0, phi0, gamma0, t0], dt, tfinal)")
+    parser.evaluate("resultado_fase1 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], [r0, v0, m0, phi0, gamma0, t0], dt, tfinal)")
 
     // Reset initial conditions for interstage flight
     setInitialConditionsTo(parser, {
       dm: '0 kg/s',
       tfinal: '10 s',
-      x: 'flatten(result_stage1[end,:])',
+      x: 'flatten(resultado_fase1[end,:])',
       'x[3]': 'm2+m3+mp' // New mass after stage seperation
     })
 
-    parser.evaluate("result_interstage = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
+    parser.evaluate("resultado_intersecao = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
     // Reset initial conditions for stage 2 flight
     setInitialConditionsTo(parser, {
       dm: '270.8 kg/s',
       isp_vac: '348 s',
       tfinal: '350 s',
-      x: 'flatten(result_interstage[end,:])',
+      x: 'flatten(resultado_intersecao[end,:])',
     })
 
-    parser.evaluate("result_stage2 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
+    parser.evaluate("resultado_fase2 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
     // Reset initial conditions for unpowered flight
     setInitialConditionsTo(parser, {
       dm: '0 kg/s',
       tfinal: '900 s',
       dt: '10 s',
-      x: 'flatten(result_stage2[end,:])',
+      x: 'flatten(resultado_fase2[end,:])',
     })
 
-    parser.evaluate("result_unpowered1 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
+    parser.evaluate("resultado_desligado1 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
     // Reset initial conditions for final orbit insertion
     setInitialConditionsTo(parser, {
       dm: '270.8 kg/s',
       tfinal: '39 s',
       dt: '0.5 s',
-      x: 'flatten(result_unpowered1[end,:])',
+      x: 'flatten(resultado_desligado1[end,:])',
     })
 
-    parser.evaluate("result_insertion = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
+    parser.evaluate("resultado_insercao = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
     // Reset initial conditions for unpowered flight
     setInitialConditionsTo(parser, {
       dm: '0 kg/s',
       tfinal: '250 s',
       dt: '10 s',
-      x: 'flatten(result_insertion[end,:])',
+      x: 'flatten(resultado_insercao[end,:])',
     })
 
-    parser.evaluate("result_unpowered2 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
+    parser.evaluate("resultado_desligado2 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
     // Preparar resultados para criação dos graficos
-    const resultNames = ['stage1', 'interstage', 'stage2', 'unpowered1', 'insertion', 'unpowered2']
-      .map(stageName => `result_${stageName}`)
+    const resultNames = ['fase1', 'intersecao', 'fase2', 'desligado1', 'insercao', 'desligado2']
+      .map(stageName => `resultado_${stageName}`)
 
     parser.set('result',
       math.concat(
@@ -92,7 +92,7 @@ function App() {
       {
         useDefaultConfig: false,
         datasets: resultNames.map((resultName, i) => ({
-          label: resultName.slice(7),
+          label: resultName.slice(10), // Remove o prefixo resultado_ da label
           data: parser.evaluate(
             'concat('
             + `(${resultName}[:,4] - phi0) * r0 / rad / km,`  // Surface distance from start (in km)

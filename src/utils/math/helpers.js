@@ -11,6 +11,7 @@ export const ndsolve = (math) => (f, x0, dt, tmax) => {
   for (let i = 0; i < nsteps; i++) {
     // Computar derivadas
     const dxdt = f.map(func => func(...x.toArray()));
+
     // Calcular próximo passo utilizando método de Euler
     const dx = math.multiply(dxdt, dt)
     x = math.add(x, dx)
