@@ -49,20 +49,19 @@ function App() {
     importMotionEquations(parser);
     importCommonFunctions(parser)
 
-    // Remember to maintain the same variable order in the call to ndsolve.
     parser.evaluate("resultado_fase1 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], [r0, v0, m0, phi0, gamma0, t0], dt, tfinal)")
 
-    // Reset initial conditions for interstage flight
+    // Redefinir condições utilizadas
     setInitialConditionsTo(parser, {
       dm: '0 kg/s',
       tfinal: '10 s',
       x: 'flatten(resultado_fase1[end,:])',
-      'x[3]': 'm2+m3+mp' // New mass after stage seperation
+      'x[3]': 'm2+m3+mp' // Nova massa de x após separação
     })
 
     parser.evaluate("resultado_intersecao = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
-    // Reset initial conditions for stage 2 flight
+    // Redefinir condições utilizadas
     setInitialConditionsTo(parser, {
       dm: '270.8 kg/s',
       isp_vac: '348 s',
@@ -72,7 +71,7 @@ function App() {
 
     parser.evaluate("resultado_fase2 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
-    // Reset initial conditions for unpowered flight
+    // Redefinir condições utilizadas
     setInitialConditionsTo(parser, {
       dm: '0 kg/s',
       tfinal: '900 s',
@@ -82,7 +81,7 @@ function App() {
 
     parser.evaluate("resultado_desligado1 = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
-    // Reset initial conditions for final orbit insertion
+    // Redefinir condições utilizadas
     setInitialConditionsTo(parser, {
       dm: '270.8 kg/s',
       tfinal: '39 s',
@@ -92,7 +91,7 @@ function App() {
 
     parser.evaluate("resultado_insercao = ndsolve([drdt, dvdt, dmdt, dphidt, dgammadt, dtdt], x, dt, tfinal)")
 
-    // Reset initial conditions for unpowered flight
+    // Redefinir condições utilizadas
     setInitialConditionsTo(parser, {
       dm: '0 kg/s',
       tfinal: '250 s',
@@ -123,8 +122,8 @@ function App() {
           label: resultName.slice(10), // Remove o prefixo resultado_ da label
           data: parser.evaluate(
             'concat('
-            + `(${resultName}[:,4] - phi0) * r0 / rad / km,`  // Surface distance from start (in km)
-            + `(${resultName}[:,1] - r0) / km`                // Height above surface (in km)
+            + `(${resultName}[:,4] - phi0) * r0 / rad / km,`  // Distancia do inicio da superficie (em km)
+            + `(${resultName}[:,1] - r0) / km`                // Altura acima da superficie (em km)
             + ')'
           ).toArray().map(([x, y]) => ({ x, y })),
           borderColor: i % 2 ? '#C8C2BC' : '#F1CA89',
