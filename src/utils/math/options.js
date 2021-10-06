@@ -45,9 +45,12 @@ export const getEarthChartOptions = () => {
       xAxes: [{
         type: 'linear',
         position: 'bottom',
+        scaleLabel: {
+          display: true,
+          labelString: 'Representação de trajetória saindo da Terra'
+        },
         min: -8000,
         max: 8000,
-        display: false
       }],
       yAxes: [{
         type: 'linear',

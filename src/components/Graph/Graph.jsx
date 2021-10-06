@@ -3,9 +3,11 @@ import { Scatter } from 'react-chartjs-2';
 
 import { getChartOptions } from '../../utils/math/options'
 
+import * as El from './Graph.style'
+
 const appendDefaultConfig = (dataSetsArr) => (
   dataSetsArr?.map(dataSet => ({ 
-    borderColor: "#dc3912",
+    borderColor: "#F1CA89",
     fill: true,
     ...dataSet
   }))
@@ -18,9 +20,12 @@ const getDatasetsObject = (datasets, useDefaultConfig) => ({
 const Graph = ({
   useDefaultConfig,
   datasets,
-  options
+  options,
+  key
 }) => (
-  <Scatter data={getDatasetsObject(datasets, useDefaultConfig)} options={getChartOptions(options)} />
+  <El.GraphWrapper key={key}>
+    <Scatter data={getDatasetsObject(datasets, useDefaultConfig)} options={getChartOptions(options)} />
+  </El.GraphWrapper>
 );
 
 export default Graph;

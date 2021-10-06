@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { create, all } from 'mathjs';
 import Graph from './components/Graph/Graph';
@@ -6,6 +6,34 @@ import Graph from './components/Graph/Graph';
 import { ndsolve, setInitialConditionsTo } from './utils/math/helpers'
 import { getMainChartOptions, getEarthChartOptions } from './utils/math/options'
 import { importCommonFunctions, importGlobals, importMotionEquations } from './utils/math/globalVariables'
+
+import * as El from './App.style'
+
+const renderGraphs = (dataSets) => {
+  const [firstDataSet, ...remainingDataSets] = dataSets;
+
+  return (
+    <>
+      <Graph 
+        key={'dataset-0'}
+        datasets={firstDataSet?.datasets}
+        options={firstDataSet?.options}
+        useDefaultCofnig={firstDataSet?.useDefaultConfig}
+      />
+      <El.ComplementaryGraphsWrapper>
+        {remainingDataSets?.map((dataSetConfig, i) => (
+          <Graph 
+            key={`dataset-${i + 1}`}
+            datasets={dataSetConfig?.datasets}
+            options={dataSetConfig?.options}
+            useDefaultConfig={dataSetConfig?.useDefaultConfig}
+            setWidthToHeight={i + 1 === remainingDataSets?.length}
+          />
+        ))}
+      </El.ComplementaryGraphsWrapper>
+    </>
+  )
+}
 
 function App() {
   const [dataSets, setDataSets] = useState([])
@@ -99,7 +127,7 @@ function App() {
             + `(${resultName}[:,1] - r0) / km`                // Height above surface (in km)
             + ')'
           ).toArray().map(([x, y]) => ({ x, y })),
-          borderColor: i % 2 ? '#f2f4f6' : '#dc3912',
+          borderColor: i % 2 ? '#C8C2BC' : '#F1CA89',
           fill: false,
         })),
         options: getMainChartOptions()
@@ -172,7 +200,7 @@ function App() {
             data: parser.evaluate("map(0:0.25:360, function(angle) = rotate([r0/km, 0], angle))")
               .toArray()
               .map(([x, y]) => ({ x, y })),
-            borderColor: "#f2f4f6",
+            borderColor: "#C8C2BC",
             fill: true
           }
         ],
@@ -181,28 +209,13 @@ function App() {
     ]))
   }, [])
 
-  const renderGraphs = () => {
-    return dataSets?.map((dataSetConfig) => (
-      <div style={{
-        // maxWidth: '100vw',
-        // maxHeight: '100vh',
-      }}>
-        <Graph 
-          datasets={dataSetConfig?.datasets}
-          options={dataSetConfig?.options}
-          useDefaultConfig={dataSetConfig?.useDefaultConfig}
-        />
-      </div>
-    ))
-  }
+  const renderedGraphs = useMemo(() => renderGraphs(dataSets), [dataSets, renderGraphs]);
 
   return (
-    <div className="App" style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(1, 1fr)'
-    }}>
-      {renderGraphs()}
-    </div>
+    <>
+      <El.Title>Simulação de trajetória de lançamento do foguete SpaceX Falcon 9</El.Title>
+      {renderedGraphs}
+    </>
   );
 }
 
